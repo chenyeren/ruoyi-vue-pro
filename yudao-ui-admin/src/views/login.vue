@@ -2,7 +2,7 @@
   <div class="login">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
       <h3 class="title">芋道后台管理系统</h3>
-      <el-form-item prop="tenantName">
+      <el-form-item prop="tenantName" v-if="tenantEnable">
         <el-input v-model="loginForm.tenantName" type="text" auto-complete="off" placeholder='租户'>
           <svg-icon slot="prefix" icon-class="tree" class="el-input__icon input-icon" />
         </el-input>
@@ -17,7 +17,7 @@
           <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
-      <el-form-item prop="code">
+      <el-form-item prop="code" v-if="captchaEnable">
         <el-input v-model="loginForm.code" auto-complete="off" placeholder="验证码" style="width: 63%" @keyup.enter.native="handleLogin">
           <svg-icon slot="prefix" icon-class="validCode" class="el-input__icon input-icon" />
         </el-input>
@@ -54,13 +54,16 @@ import { getCodeImg,socialAuthRedirect } from "@/api/login";
 import { getTenantIdByName } from "@/api/system/tenant";
 import Cookies from "js-cookie";
 import { encrypt, decrypt } from '@/utils/jsencrypt'
-import {InfraApiErrorLogProcessStatusEnum, SystemUserSocialTypeEnum} from "@/utils/constants";
+import {SystemUserSocialTypeEnum} from "@/utils/constants";
+import { getTenantEnable } from "@/utils/ruoyi";
 
 export default {
   name: "Login",
   data() {
     return {
       codeUrl: "",
+      captchaEnable: true,
+      tenantEnable: true,
       loginForm: {
         username: "admin",
         password: "admin123",
@@ -70,6 +73,13 @@ export default {
         tenantName: "芋道源码",
       },
       loginRules: {
+        username: [
+          { required: true, trigger: "blur", message: "用户名不能为空" }
+        ],
+        password: [
+          { required: true, trigger: "blur", message: "密码不能为空" }
+        ],
+        code: [{ required: true, trigger: "change", message: "验证码不能为空" }],
         tenantName: [
           { required: true, trigger: "blur", message: "租户不能为空" },
           {
@@ -89,13 +99,6 @@ export default {
             trigger: 'blur'
           }
         ],
-        username: [
-          { required: true, trigger: "blur", message: "用户名不能为空" }
-        ],
-        password: [
-          { required: true, trigger: "blur", message: "密码不能为空" }
-        ],
-        code: [{ required: true, trigger: "change", message: "验证码不能为空" }]
       },
       loading: false,
       redirect: undefined,
@@ -112,6 +115,8 @@ export default {
   //   }
   // },
   created() {
+    // 租户开关
+    this.tenantEnable = getTenantEnable();
     // 重定向地址
     this.redirect = this.$route.query.redirect;
     this.getCode();
@@ -119,10 +124,18 @@ export default {
   },
   methods: {
     getCode() {
+      // 只有开启的状态，才加载验证码。默认开启
+      if (!this.captchaEnable) {
+        return;
+      }
+      // 请求远程，获得验证码
       getCodeImg().then(res => {
         res = res.data;
-        this.codeUrl = "data:image/gif;base64," + res.img;
-        this.loginForm.uuid = res.uuid;
+        this.captchaEnable = res.enable;
+        if (this.captchaEnable) {
+          this.codeUrl = "data:image/gif;base64," + res.img;
+          this.loginForm.uuid = res.uuid;
+        }
       });
     },
     getCookie() {

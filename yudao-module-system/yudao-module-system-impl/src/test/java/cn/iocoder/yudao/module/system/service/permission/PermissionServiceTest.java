@@ -11,7 +11,7 @@ import cn.iocoder.yudao.module.system.mq.producer.permission.PermissionProducer;
 import cn.iocoder.yudao.module.system.service.dept.DeptService;
 import cn.iocoder.yudao.framework.datapermission.core.dept.service.dto.DeptDataPermissionRespDTO;
 import cn.iocoder.yudao.framework.security.core.LoginUser;
-import cn.iocoder.yudao.framework.security.core.enums.DataScopeEnum;
+import cn.iocoder.yudao.module.system.enums.permission.DataScopeEnum;
 import cn.iocoder.yudao.module.system.test.BaseDbUnitTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -47,7 +47,6 @@ public class PermissionServiceTest extends BaseDbUnitTest {
     private MenuService menuService;
     @MockBean
     private DeptService deptService;
-
     @MockBean
     private PermissionProducer permissionProducer;
 
@@ -203,8 +202,9 @@ public class PermissionServiceTest extends BaseDbUnitTest {
         // 断言
         assertFalse(result.getAll());
         assertFalse(result.getSelf());
-        assertEquals(1, result.getDeptIds().size());
+        assertEquals(2, result.getDeptIds().size());
         assertTrue(CollUtil.contains(result.getDeptIds(), deptDO.getId()));
+        assertTrue(CollUtil.contains(result.getDeptIds(), loginUser.getDeptId()));
         assertSame(result, loginUser.getContext(PermissionServiceImpl.CONTEXT_KEY, DeptDataPermissionRespDTO.class));
     }
 
