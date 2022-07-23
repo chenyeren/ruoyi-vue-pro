@@ -1,20 +1,21 @@
 <template>
   <div class="component-upload-image">
     <el-upload
-      :action="uploadImgUrl"
-      list-type="picture-card"
-      :on-success="handleUploadSuccess"
-      :before-upload="handleBeforeUpload"
-      :limit="limit"
-      :on-error="handleUploadError"
-      :on-exceed="handleExceed"
-      name="file"
-      :on-remove="handleRemove"
-      :show-file-list="true"
-      :headers="headers"
-      :file-list="fileList"
-      :on-preview="handlePictureCardPreview"
-      :class="{hide: this.fileList.length >= this.limit}"
+        multiple
+        :action="uploadFileUrl"
+        list-type="picture-card"
+        :on-success="handleUploadSuccess"
+        :before-upload="handleBeforeUpload"
+        :limit="limit"
+        :on-error="handleUploadError"
+        :on-exceed="handleExceed"
+        name="file"
+        :on-remove="handleRemove"
+        :show-file-list="true"
+        :headers="headers"
+        :file-list="fileList"
+        :on-preview="handlePictureCardPreview"
+        :class="{hide: this.fileList.length >= this.limit}"
     >
       <i class="el-icon-plus"></i>
     </el-upload>
@@ -28,21 +29,21 @@
     </div>
 
     <el-dialog
-      :visible.sync="dialogVisible"
-      title="预览"
-      width="800"
-      append-to-body
+        :visible.sync="dialogVisible"
+        title="预览"
+        width="800"
+        append-to-body
     >
       <img
-        :src="dialogImageUrl"
-        style="display: block; max-width: 100%; margin: 0 auto"
+          :src="dialogImageUrl"
+          style="display: block; max-width: 100%; margin: 0 auto"
       />
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { getToken } from "@/utils/auth";
+import { getAccessToken } from "@/utils/auth";
 
 export default {
   props: {
@@ -70,14 +71,13 @@ export default {
   },
   data() {
     return {
+      number: 0,
+      uploadList: [],
       dialogImageUrl: "",
       dialogVisible: false,
       hideUpload: false,
-      baseUrl: process.env.VUE_APP_BASE_API,
-      uploadImgUrl: process.env.VUE_APP_BASE_API + "/common/upload", // 上传的图片服务器地址
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
+      uploadFileUrl: process.env.VUE_APP_BASE_API + "/admin-api/infra/file/upload", // 请求地址
+      headers: { Authorization: "Bearer " + getAccessToken() }, // 设置上传的请求头部
       fileList: []
     };
   },
@@ -90,11 +90,8 @@ export default {
           // 然后将数组转为对象数组
           this.fileList = list.map(item => {
             if (typeof item === "string") {
-              if (item.indexOf(this.baseUrl) === -1) {
-                item = { name: this.baseUrl + item, url: this.baseUrl + item };
-              } else {
-                item = { name: item, url: item };
-              }
+              // edit by 芋道源码
+              item = { name: item, url: item };
             }
             return item;
           });
@@ -124,9 +121,15 @@ export default {
     },
     // 上传成功回调
     handleUploadSuccess(res) {
-      this.fileList.push({ name: res.fileName, url: res.fileName });
-      this.$emit("input", this.listToString(this.fileList));
-      this.loading.close();
+      // edit by 芋道源码
+      this.uploadList.push({ name: res.data, url: res.data });
+      if (this.uploadList.length === this.number) {
+        this.fileList = this.fileList.concat(this.uploadList);
+        this.uploadList = [];
+        this.number = 0;
+        this.$emit("input", this.listToString(this.fileList));
+        this.$modal.closeLoading();
+      }
     },
     // 上传前loading加载
     handleBeforeUpload(file) {
@@ -146,35 +149,27 @@ export default {
       }
 
       if (!isImg) {
-        this.$message.error(
-          `文件格式不正确, 请上传${this.fileType.join("/")}图片格式文件!`
-        );
+        this.$modal.msgError(`文件格式不正确, 请上传${this.fileType.join("/")}图片格式文件!`);
         return false;
       }
       if (this.fileSize) {
         const isLt = file.size / 1024 / 1024 < this.fileSize;
         if (!isLt) {
-          this.$message.error(`上传头像图片大小不能超过 ${this.fileSize} MB!`);
+          this.$modal.msgError(`上传头像图片大小不能超过 ${this.fileSize} MB!`);
           return false;
         }
       }
-      this.loading = this.$loading({
-        lock: true,
-        text: "上传中",
-        background: "rgba(0, 0, 0, 0.7)",
-      });
+      this.$modal.loading("正在上传图片，请稍候...");
+      this.number++;
     },
     // 文件个数超出
     handleExceed() {
-      this.$message.error(`上传文件数量不能超过 ${this.limit} 个!`);
+      this.$modal.msgError(`上传文件数量不能超过 ${this.limit} 个!`);
     },
     // 上传失败
     handleUploadError() {
-      this.$message({
-        type: "error",
-        message: "上传失败",
-      });
-      this.loading.close();
+      this.$modal.msgError("上传图片失败，请重试");
+      this.$modal.closeLoading();
     },
     // 预览
     handlePictureCardPreview(file) {
@@ -188,7 +183,7 @@ export default {
       for (let i in list) {
         strs += list[i].url.replace(this.baseUrl, "") + separator;
       }
-      return strs != '' ? strs.substr(0, strs.length - 1) : '';
+      return strs !== '' ? strs.substr(0, strs.length - 1) : '';
     }
   }
 };

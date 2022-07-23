@@ -2,81 +2,59 @@
   <div class="app-container">
 
     <!-- 搜索工作栏 -->
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="120px">
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="120px">
       <el-form-item label="所属商户" prop="merchantId">
-        <el-select
-          v-model="queryParams.merchantId"
-          clearable
-          @clear="()=>{queryParams.merchantId = null}"
-          filterable
-          remote
-          reserve-keyword
-          placeholder="请选择所属商户"
-          @change="handleGetAppListByMerchantId"
-          :remote-method="handleGetMerchantListByName"
-          :loading="merchantLoading">
-          <el-option
-            v-for="item in merchantList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id">
-          </el-option>
+        <el-select v-model="queryParams.merchantId" clearable @clear="()=>{queryParams.merchantId = null}"
+          filterable remote reserve-keyword placeholder="请选择所属商户" @change="handleGetAppListByMerchantId"
+          :remote-method="handleGetMerchantListByName" :loading="merchantLoading">
+          <el-option v-for="item in merchantList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
       </el-form-item>
       <el-form-item label="应用编号" prop="appId">
-        <el-select
-          clearable
-          v-model="queryParams.appId"
-          filterable
-          placeholder="请选择应用信息">
-          <el-option
-            v-for="item in appList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id">
-          </el-option>
+        <el-select clearable v-model="queryParams.appId" filterable placeholder="请选择应用信息">
+          <el-option v-for="item in appList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
       </el-form-item>
       <el-form-item label="渠道编码" prop="channelCode">
         <el-select v-model="queryParams.channelCode" placeholder="请输入渠道编码" clearable
-                   size="small" @clear="()=>{queryParams.channelCode = null}">
+                   @clear="()=>{queryParams.channelCode = null}">
           <el-option v-for="dict in payChannelCodeDictDatum" :key="dict.value" :label="dict.label" :value="dict.value"/>
         </el-select>
       </el-form-item>
       <el-form-item label="退款类型" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择退款类型" clearable size="small">
+        <el-select v-model="queryParams.type" placeholder="请选择退款类型" clearable>
           <el-option v-for="dict in payRefundOrderTypeDictDatum" :key="parseInt(dict.value)"
                      :label="dict.label" :value="parseInt(dict.value)"/>
         </el-select>
       </el-form-item>
       <el-form-item label="商户退款订单号" prop="merchantRefundNo">
-        <el-input v-model="queryParams.merchantRefundNo" placeholder="请输入商户退款订单号" clearable size="small"
+        <el-input v-model="queryParams.merchantRefundNo" placeholder="请输入商户退款订单号" clearable
                   @keyup.enter.native="handleQuery"/>
       </el-form-item>
 
       <el-form-item label="退款状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择退款状态" clearable size="small">
+        <el-select v-model="queryParams.status" placeholder="请选择退款状态" clearable>
           <el-option v-for="dict in payRefundOrderDictDatum" :key="parseInt(dict.value)"
                      :label="dict.label" :value="parseInt(dict.value)"/>
         </el-select>
       </el-form-item>
 
       <el-form-item label="退款回调状态" prop="notifyStatus">
-        <el-select v-model="queryParams.notifyStatus" placeholder="请选择通知商户退款结果的回调状态" clearable size="small">
+        <el-select v-model="queryParams.notifyStatus" placeholder="请选择通知商户退款结果的回调状态" clearable>
           <el-option v-for="dict in payOrderNotifyDictDatum" :key="parseInt(dict.value)"
                      :label="dict.label" :value="parseInt(dict.value)"/>
         </el-select>
       </el-form-item>
       <el-form-item label="创建时间">
         <el-date-picker
-          v-model="dateRangeCreateTime" size="small" style="width: 350px"
+          v-model="dateRangeCreateTime" style="width: 350px"
           value-format="yyyy-MM-dd HH:mm:ss" type="datetimerange"  range-separator="-"
           :default-time="['00:00:00','23:59:59']" start-placeholder="开始日期" end-placeholder="结束日期">
         </el-date-picker>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -96,7 +74,7 @@
       <!--      <el-table-column label="商户名称" align="center" prop="merchantName" width="120"/>-->
       <!--      <el-table-column label="应用名称" align="center" prop="appName" width="120"/>-->
       <el-table-column label="支付渠道" align="center" width="130">
-        <template v-slot="scope">
+        <template slot-scope="scope">
           <el-popover trigger="hover" placement="top">
             <p>商户名称: {{ scope.row.merchantName }}</p>
             <p>应用名称: {{ scope.row.appName }}</p>
@@ -110,7 +88,7 @@
       <!--      <el-table-column label="交易订单号" align="center" prop="tradeNo" width="140"/>-->
       <!--      <el-table-column label="商户订单编号" align="center" prop="merchantOrderId" width="140"/>-->
       <el-table-column label="商户订单号" align="left" width="230">
-        <template v-slot="scope">
+        <template slot-scope="scope">
           <p class="order-font">
             <el-tag size="mini">退款</el-tag>
             {{ scope.row.merchantRefundNo }}
@@ -122,7 +100,7 @@
         </template>
       </el-table-column>
       <el-table-column label="支付订单号" align="center" prop="merchantRefundNo" width="250">
-        <template v-slot="scope">
+        <template slot-scope="scope">
           <p class="order-font">
             <el-tag size="mini">交易</el-tag>
             {{ scope.row.tradeNo }}
@@ -134,7 +112,7 @@
         </template>
       </el-table-column>
       <el-table-column label="支付金额(元)" align="center" prop="payAmount" width="100">
-        <template v-slot="scope" class="">
+        <template slot-scope="scope" class="">
           ￥{{ parseFloat(scope.row.payAmount / 100).toFixed(2) }}
         </template>
       </el-table-column>
@@ -144,17 +122,17 @@
         </template>
       </el-table-column>
       <el-table-column label="退款类型" align="center" prop="type" width="80">
-        <template v-slot="scope">
+        <template slot-scope="scope">
           <dict-tag :type="DICT_TYPE.PAY_REFUND_ORDER_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
       <el-table-column label="退款状态" align="center" prop="status">
-        <template v-slot="scope">
+        <template slot-scope="scope">
           <dict-tag :type="DICT_TYPE.PAY_REFUND_ORDER_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="回调状态" align="center" prop="notifyStatus">
-        <template v-slot="scope">
+        <template slot-scope="scope">
           <dict-tag :type="DICT_TYPE.PAY_ORDER_NOTIFY_STATUS" :value="scope.row.notifyStatus" />
         </template>
       </el-table-column>
@@ -205,7 +183,7 @@
           <el-tag class="tag-purple" size="mini">{{ parseFloat(refundDetail.refundAmount / 100).toFixed(2) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="退款类型">
-          <template v-slot="scope">
+          <template slot-scope="scope">
             <dict-tag :type="DICT_TYPE.PAY_REFUND_ORDER_TYPE" :value="refundDetail.type" />
           </template>
         </el-descriptions-item>

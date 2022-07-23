@@ -23,17 +23,18 @@ export const DICT_TYPE = {
   SYSTEM_SMS_SEND_STATUS: 'system_sms_send_status',
   SYSTEM_SMS_RECEIVE_STATUS: 'system_sms_receive_status',
   SYSTEM_ERROR_CODE_TYPE: 'system_error_code_type',
+  SYSTEM_OAUTH2_GRANT_TYPE: 'system_oauth2_grant_type',
 
   // ========== INFRA 模块 ==========
+  INFRA_BOOLEAN_STRING: 'infra_boolean_string',
   INFRA_REDIS_TIMEOUT_TYPE: 'infra_redis_timeout_type',
   INFRA_JOB_STATUS: 'infra_job_status',
   INFRA_JOB_LOG_STATUS: 'infra_job_log_status',
   INFRA_API_ERROR_LOG_PROCESS_STATUS: 'infra_api_error_log_process_status',
   INFRA_CONFIG_TYPE: 'infra_config_type',
-
-  // ========== TOOL 模块 ==========
-  TOOL_CODEGEN_TEMPLATE_TYPE: 'tool_codegen_template_type',
-  TOOL_CODEGEN_SCENE: 'tool_codegen_scene',
+  INFRA_CODEGEN_TEMPLATE_TYPE: 'infra_codegen_template_type',
+  INFRA_CODEGEN_SCENE: 'infra_codegen_scene',
+  INFRA_FILE_STORAGE: 'infra_file_storage',
 
   // ========== BPM 模块 ==========
   BPM_MODEL_CATEGORY: 'bpm_model_category',
@@ -64,11 +65,6 @@ export const DICT_TYPE = {
  * @returns {*|Array} 数据字典数组
  */
 export function getDictDatas(dictType) {
-  // if (dictType === 'bpm_task_assign_script') {
-  //   console.log(store.getters.dict_datas[dictType]);
-  //   debugger
-  // }
-  // debugger
   return store.getters.dict_datas[dictType] || []
 }
 
@@ -95,8 +91,6 @@ export function getDictDatas2(dictType, values) {
       results.push(dict);
     }
   }
-  // debugger
-  console.log(results);
   return results;
 }
 

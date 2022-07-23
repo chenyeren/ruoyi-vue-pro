@@ -96,6 +96,8 @@ export default {
         }
         // 高亮流程图
         await this.highlightDiagram();
+        const canvas = this.bpmnModeler.get('canvas');
+        canvas.zoom("fit-viewport", "auto");
       } catch (e) {
         console.error(e);
         // console.error(`[Process Designer Warn]: ${e?.message || e}`);
@@ -114,10 +116,11 @@ export default {
       let todoActivity = activityList.find(m => !m.endTime) // 找到待办的任务
       let endActivity = activityList[activityList.length - 1] // 获得最后一个任务
       // debugger
-      console.log(this.bpmnModeler.getDefinitions().rootElements[0].flowElements);
+      // console.log(this.bpmnModeler.getDefinitions().rootElements[0].flowElements);
       this.bpmnModeler.getDefinitions().rootElements[0].flowElements?.forEach(n => {
         let activity = activityList.find(m => m.key === n.id) // 找到对应的活动
         if (n.$type === 'bpmn:UserTask') { // 用户任务
+          debugger
           if (!activity) {
             return;
           }
@@ -290,8 +293,8 @@ export default {
           if (task.endTime) {
             html += `<p>结束时间：${this.parseTime(task.endTime)}</p>`
           }
-          if (task.comment) {
-            html += `<p>审批建议：${task.comment}</p>`
+          if (task.reason) {
+            html += `<p>审批建议：${task.reason}</p>`
           }
         } else if (element.type === 'bpmn:EndEvent' && this.processInstance) {
           html = `<p>结果：${this.getDictDataLabel(this.DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT, this.processInstance.result)}</p>`;

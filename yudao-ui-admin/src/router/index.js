@@ -43,6 +43,11 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/sso',
+    component: (resolve) => require(['@/views/sso'], resolve),
+    hidden: true
+  },
+  {
     path: '/social-login',
     component: (resolve) => require(['@/views/socialLogin'], resolve),
     hidden: true
@@ -108,9 +113,9 @@ export const constantRoutes = [
     hidden: true,
     children: [{
         path: 'edit/:tableId(\\d+)',
-        component: (resolve) => require(['@/views/tool/codegen/editTable'], resolve),
+        component: (resolve) => require(['@/views/infra/codegen/editTable'], resolve),
         name: 'GenEdit',
-        meta: {title: '修改生成配置', activeMenu: '/tool/codegen'}
+        meta: {title: '修改生成配置', activeMenu: '/infra/codegen'}
       }
     ]
   }, {
@@ -163,6 +168,12 @@ export const constantRoutes = [
     ]
   }
 ]
+
+// 防止连续点击多次路由报错
+let routerPush = Router.prototype.push;
+Router.prototype.push = function push(location) {
+  return routerPush.call(this, location).catch(err => err)
+}
 
 export default new Router({
   base: process.env.VUE_APP_APP_NAME ? process.env.VUE_APP_APP_NAME : "/",

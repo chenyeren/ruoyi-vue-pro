@@ -1,5 +1,9 @@
 <template>
   <div class="app-container">
+    <doc-alert title="用户体系" url="https://doc.iocoder.cn/user-center/" />
+    <doc-alert title="三方登陆" url="https://doc.iocoder.cn/social-user/" />
+    <doc-alert title="Excel 导入导出" url="https://doc.iocoder.cn/excel-import-and-export/" />
+    <!-- 搜索工作栏 -->
     <el-row :gutter="20">
       <!--部门数据-->
       <el-col :span="4" :xs="24">
@@ -8,32 +12,32 @@
         </div>
         <div class="head-container">
           <el-tree :data="deptOptions" :props="defaultProps" :expand-on-click-node="false" :filter-node-method="filterNode"
-                   ref="tree" default-expand-all @node-click="handleNodeClick"/>
+                   ref="tree" default-expand-all highlight-current @node-click="handleNodeClick"/>
         </div>
       </el-col>
       <!--用户数据-->
       <el-col :span="20" :xs="24">
-        <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+        <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
           <el-form-item label="用户名称" prop="username">
-            <el-input v-model="queryParams.username" placeholder="请输入用户名称" clearable size="small" style="width: 240px"
+            <el-input v-model="queryParams.username" placeholder="请输入用户名称" clearable style="width: 240px"
                       @keyup.enter.native="handleQuery"/>
           </el-form-item>
           <el-form-item label="手机号码" prop="mobile">
-            <el-input v-model="queryParams.mobile" placeholder="请输入手机号码" clearable size="small" style="width: 240px"
+            <el-input v-model="queryParams.mobile" placeholder="请输入手机号码" clearable style="width: 240px"
                       @keyup.enter.native="handleQuery"/>
           </el-form-item>
           <el-form-item label="状态" prop="status">
-            <el-select v-model="queryParams.status" placeholder="用户状态" clearable size="small" style="width: 240px">
+            <el-select v-model="queryParams.status" placeholder="用户状态" clearable style="width: 240px">
               <el-option v-for="dict in statusDictDatas" :key="parseInt(dict.value)" :label="dict.label" :value="parseInt(dict.value)"/>
             </el-select>
           </el-form-item>
           <el-form-item label="创建时间">
-            <el-date-picker v-model="dateRange" size="small" style="width: 240px" value-format="yyyy-MM-dd" type="daterange"
+            <el-date-picker v-model="dateRange" style="width: 240px" value-format="yyyy-MM-dd" type="daterange"
               range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+            <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
           </el-form-item>
         </el-form>
 
@@ -107,7 +111,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="归属部门" prop="deptId">
-              <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true"
+              <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" :clearable="false"
                           placeholder="请选择归属部门" :normalizer="normalizer"/>
             </el-form-item>
           </el-col>
@@ -233,7 +237,7 @@ import {
   resetUserPwd,
   updateUser
 } from "@/api/system/user";
-import {getToken} from "@/utils/auth";
+import {getAccessToken} from "@/utils/auth";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 
@@ -300,7 +304,7 @@ export default {
         // 设置上传的请求头部
         headers: getBaseHeader(),
         // 上传的地址
-        url: process.env.VUE_APP_BASE_API + '/admin-api/' + "/system/user/import"
+        url: process.env.VUE_APP_BASE_API + '/admin-api/system/user/import'
       },
       // 查询参数
       queryParams: {

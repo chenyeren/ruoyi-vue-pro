@@ -11,8 +11,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Set;
 
-// TODO 芋艿：参数校验
-
 /**
  * 微信支付的 PayClientConfig 实现类
  * 属性主要来自 {@link com.github.binarywang.wxpay.config.WxPayConfig} 的必要属性
@@ -22,7 +20,6 @@ import java.util.Set;
 @Data
 public class WXPayClientConfig implements PayClientConfig {
 
-    // TODO 芋艿：V2 or V3 客户端
     /**
      * API 版本 - V2
      * https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=4_1
@@ -82,9 +79,9 @@ public class WXPayClientConfig implements PayClientConfig {
     @NotBlank(message = "apiclient_cert 不能为空", groups = V3.class)
     private String privateCertContent;
     /**
-     * apiV3 秘钥值
+     * apiV3 密钥值
      */
-    @NotBlank(message = "apiV3 秘钥值 不能为空", groups = V3.class)
+    @NotBlank(message = "apiV3 密钥值 不能为空", groups = V3.class)
     private String apiV3Key;
 
     /**
