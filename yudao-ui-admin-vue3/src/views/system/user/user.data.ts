@@ -7,8 +7,18 @@ import { CrudSchema, useCrudSchemas } from '@/hooks/web/useCrudSchemas'
 const { t } = useI18n()
 // 表单校验
 export const rules = reactive({
+  username: [required],
   nickname: [required],
-  status: [required]
+  email: [required],
+  status: [required],
+  mobile: [
+    {
+      pattern:
+        /^(?:(?:\+|00)86)?1(?:(?:3[\d])|(?:4[5-79])|(?:5[0-35-9])|(?:6[5-7])|(?:7[0-8])|(?:8[\d])|(?:9[189]))\d{8}$/,
+      trigger: 'blur',
+      message: '请输入正确的手机号码'
+    }
+  ]
 })
 // crudSchemas
 const crudSchemas = reactive<CrudSchema[]>([
@@ -101,7 +111,7 @@ const crudSchemas = reactive<CrudSchema[]>([
   },
   {
     label: t('common.createTime'),
-    field: 'daterange',
+    field: 'createTime',
     table: {
       show: false
     },
@@ -115,14 +125,44 @@ const crudSchemas = reactive<CrudSchema[]>([
       show: true,
       component: 'DatePicker',
       componentProps: {
-        type: 'daterange',
-        valueFormat: 'YYYY-MM-DD HH:mm:ss'
+        type: 'datetimerange',
+        valueFormat: 'YYYY-MM-DD HH:mm:ss',
+        defaultTime: [new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 2, 1, 23, 59, 59)],
+        shortcuts: [
+          {
+            text: '近一周',
+            value: () => {
+              const end = new Date()
+              const start = new Date()
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+              return [start, end]
+            }
+          },
+          {
+            text: '近一个月',
+            value: () => {
+              const end = new Date()
+              const start = new Date()
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+              return [start, end]
+            }
+          },
+          {
+            text: '近三个月',
+            value: () => {
+              const end = new Date()
+              const start = new Date()
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+              return [start, end]
+            }
+          }
+        ]
       }
     }
   },
   {
     field: 'action',
-    width: '340px',
+    width: '400px',
     label: t('table.action'),
     form: {
       show: false

@@ -1,5 +1,7 @@
 export type CodegenTableVO = {
   id: number
+  tableId: number
+  isParentMenuIdValid: boolean
   dataSourceConfigId: number
   scene: number
   tableName: string
@@ -48,4 +50,12 @@ export type CodegenDetailVO = {
 export type CodegenPreviewVO = {
   filePath: string
   code: string
+}
+export type CodegenUpdateReqVO = {
+  table: CodegenTableVO
+  columns: CodegenColumnVO[]
+}
+export type CodegenCreateListReqVO = {
+  dataSourceConfigId: number
+  tableNames: string[]
 }

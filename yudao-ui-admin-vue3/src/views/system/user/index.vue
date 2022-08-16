@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { onMounted, ref, unref, watch } from 'vue'
+import { onMounted, reactive, ref, unref, watch } from 'vue'
 import dayjs from 'dayjs'
 import {
+  ElTag,
   ElInput,
-  ElMessage,
   ElCard,
   ElTree,
   ElTreeSelect,
   ElSelect,
   ElOption,
+  ElTransfer,
   ElForm,
   ElFormItem,
   ElUpload,
   ElSwitch,
   ElCheckbox,
-  ElMessageBox,
   UploadInstance,
   UploadRawFile
 } from 'element-plus'
@@ -25,13 +25,20 @@ import { useTable } from '@/hooks/web/useTable'
 import { FormExpose } from '@/components/Form'
 import type { UserVO } from '@/api/system/user/types'
 import type { PostVO } from '@/api/system/post/types'
+import type { PermissionAssignUserRoleReqVO } from '@/api/system/permission/types'
 import { listSimpleDeptApi } from '@/api/system/dept'
 import { listSimplePostsApi } from '@/api/system/post'
+import { listSimpleRolesApi } from '@/api/system/role'
+import { aassignUserRoleApi, listUserRolesApi } from '@/api/system/permission'
 import { rules, allSchemas } from './user.data'
 import * as UserApi from '@/api/system/user'
 import download from '@/utils/download'
+import { useRouter } from 'vue-router'
 import { CommonStatusEnum } from '@/utils/constants'
 import { getAccessToken, getTenantId } from '@/utils/auth'
+import { useMessage } from '@/hooks/web/useMessage'
+
+const message = useMessage()
 interface Tree {
   id: number
   name: string
@@ -56,7 +63,7 @@ const { getList, setSearchParams, delList, exportList } = methods
 
 // ========== 创建部门树结构 ==========
 const filterText = ref('')
-const deptOptions = ref([]) // 树形结构
+const deptOptions = ref<any[]>([]) // 树形结构
 const searchForm = ref<FormExpose>()
 const treeRef = ref<InstanceType<typeof ElTree>>()
 const getTree = async () => {
@@ -73,6 +80,10 @@ const handleDeptNodeClick = (data: { [key: string]: any }) => {
   }
   tableTitle.value = data.name
   methods.getList()
+}
+const { push } = useRouter()
+const handleDeptEdit = () => {
+  push('/system/dept')
 }
 watch(filterText, (val) => {
   treeRef.value!.filter(val)
@@ -127,10 +138,10 @@ const submitForm = async () => {
     data.postIds = postIds.value
     if (actionType.value === 'create') {
       await UserApi.createUserApi(data)
-      ElMessage.success(t('common.createSuccess'))
+      message.success(t('common.createSuccess'))
     } else {
       await UserApi.updateUserApi(data)
-      ElMessage.success(t('common.updateSuccess'))
+      message.success(t('common.updateSuccess'))
     }
     // 操作成功，重新加载列表
     dialogVisible.value = false
@@ -142,16 +153,13 @@ const submitForm = async () => {
 // 改变用户状态操作
 const handleStatusChange = async (row: UserVO) => {
   const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
-  ElMessageBox.confirm('确认要"' + text + '""' + row.username + '"用户吗?', t('common.reminder'), {
-    confirmButtonText: t('common.ok'),
-    cancelButtonText: t('common.cancel'),
-    type: 'warning'
-  })
+  message
+    .confirm('确认要"' + text + '""' + row.username + '"用户吗?', t('common.reminder'))
     .then(async () => {
       row.status =
         row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.ENABLE : CommonStatusEnum.DISABLE
       await UserApi.updateUserStatusApi(row.id, row.status)
-      ElMessage.success(text + '成功')
+      message.success(text + '成功')
       await getList()
     })
     .catch(() => {
@@ -161,25 +169,43 @@ const handleStatusChange = async (row: UserVO) => {
 }
 // 重置密码
 const handleResetPwd = (row: UserVO) => {
-  ElMessageBox.prompt('请输入"' + row.username + '"的新密码', t('common.reminder'), {
-    confirmButtonText: t('common.ok'),
-    cancelButtonText: t('common.cancel')
-  }).then(({ value }) => {
+  message.prompt('请输入"' + row.username + '"的新密码', t('common.reminder')).then(({ value }) => {
     UserApi.resetUserPwdApi(row.id, value).then(() => {
-      ElMessage.success('修改成功，新密码是：' + value)
+      message.success('修改成功，新密码是：' + value)
     })
   })
 }
-// 删除操作
-const handleDelete = (row: UserVO) => {
-  delList(row.id, false)
+// 分配角色
+const roleDialogVisible = ref(false)
+const roleOptions = ref()
+const userRole = reactive({
+  id: 0,
+  username: '',
+  nickname: '',
+  roleIds: []
+})
+const handleRole = async (row: UserVO) => {
+  userRole.id = row.id
+  userRole.username = row.username
+  userRole.nickname = row.nickname
+  // 获得角色拥有的权限集合
+  const roles = await listUserRolesApi(row.id)
+  userRole.roleIds = roles
+  // 获取角色列表
+  const roleOpt = await listSimpleRolesApi()
+  roleOptions.value = roleOpt
+  roleDialogVisible.value = true
 }
-
-// 导出操作
-const handleExport = async () => {
-  await exportList('用户数据.xls')
+// 提交
+const submitRole = async () => {
+  const data = ref<PermissionAssignUserRoleReqVO>({
+    userId: userRole.id,
+    roleIds: userRole.roleIds
+  })
+  await aassignUserRoleApi(data.value)
+  message.success(t('common.updateSuccess'))
+  roleDialogVisible.value = false
 }
-
 // ========== 详情相关 ==========
 const detailRef = ref()
 
@@ -207,8 +233,8 @@ const beforeExcelUpload = (file: UploadRawFile) => {
     file.type === 'application/vnd.ms-excel' ||
     file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
   const isLt5M = file.size / 1024 / 1024 < 5
-  if (!isExcel) ElMessage.error('上传文件只能是 xls / xlsx 格式!')
-  if (!isLt5M) ElMessage.error('上传文件大小不能超过 5MB!')
+  if (!isExcel) message.error('上传文件只能是 xls / xlsx 格式!')
+  if (!isLt5M) message.error('上传文件大小不能超过 5MB!')
   return isExcel && isLt5M
 }
 // 文件上传
@@ -224,7 +250,7 @@ const submitFileForm = () => {
 // 文件上传成功
 const handleFileSuccess = (response: any): void => {
   if (response.code !== 0) {
-    ElMessage.error(response.msg)
+    message.error(response.msg)
     return
   }
   importDialogVisible.value = false
@@ -242,22 +268,23 @@ const handleFileSuccess = (response: any): void => {
   for (const username in data.failureUsernames) {
     text += '< ' + username + ': ' + data.failureUsernames[username] + ' >'
   }
-  ElMessageBox.alert(text)
+  message.alert(text)
+  getList()
 }
 // 文件数超出提示
 const handleExceed = (): void => {
-  ElMessage.error('最多只能上传一个文件！')
+  message.error('最多只能上传一个文件！')
 }
 // 上传错误提示
 const excelUploadError = (): void => {
-  ElMessage.error('导入数据失败，请您重新上传！')
+  message.error('导入数据失败，请您重新上传！')
 }
 // ========== 初始化 ==========
 onMounted(async () => {
   await getTree()
   await getPostOptions()
+  await getList()
 })
-getList()
 </script>
 
 <template>
@@ -266,6 +293,9 @@ getList()
       <template #header>
         <div class="card-header">
           <span>部门列表</span>
+          <el-button link class="button" type="primary" @click="handleDeptEdit">
+            修改部门
+          </el-button>
         </div>
       </template>
       <el-input v-model="filterText" placeholder="搜索部门" />
@@ -306,7 +336,11 @@ getList()
         >
           <Icon icon="ep:upload" class="mr-5px" /> {{ t('action.import') }}
         </el-button>
-        <el-button type="warning" v-hasPermi="['system:user:export']" @click="handleExport">
+        <el-button
+          type="warning"
+          v-hasPermi="['system:user:export']"
+          @click="exportList('用户数据.xls')"
+        >
           <Icon icon="ep:download" class="mr-5px" /> {{ t('action.export') }}
         </el-button>
       </div>
@@ -365,8 +399,16 @@ getList()
           <el-button
             link
             type="primary"
+            v-hasPermi="['system:permission:assign-user-role']"
+            @click="handleRole(row)"
+          >
+            <Icon icon="ep:key" class="mr-1px" /> 分配角色
+          </el-button>
+          <el-button
+            link
+            type="primary"
             v-hasPermi="['system:user:delete']"
-            @click="handleDelete(row)"
+            @click="delList(row.id, false)"
           >
             <Icon icon="ep:delete" class="mr-1px" /> {{ t('action.del') }}
           </el-button>
@@ -392,7 +434,7 @@ getList()
         />
       </template>
       <template #postIds>
-        <el-select v-model="postIds" multiple placeholder="Select">
+        <el-select v-model="postIds" multiple :placeholder="t('common.selectText')">
           <el-option
             v-for="item in postOptions"
             :key="item.id"
@@ -409,10 +451,14 @@ getList()
       :data="detailRef"
     >
       <template #deptId="{ row }">
-        <span>{{ row.dept.name }}</span>
+        <span>{{ row.dept?.name }}</span>
       </template>
       <template #postIds="{ row }">
-        <span>{{ row.dept.name }}</span>
+        <el-tag v-for="(post, index) in row.postIds" :key="index" index="">
+          <template v-for="postObj in postOptions">
+            {{ post === postObj.id ? postObj.name : '' }}
+          </template>
+        </el-tag>
       </template>
       <template #sex="{ row }">
         <DictTag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="row.sex" />
@@ -435,6 +481,35 @@ getList()
         {{ t('action.save') }}
       </el-button>
       <el-button @click="dialogVisible = false">{{ t('dialog.close') }}</el-button>
+    </template>
+  </Dialog>
+  <!-- 分配用户角色 -->
+  <Dialog v-model="roleDialogVisible" title="分配角色" maxHeight="450px">
+    <el-form :model="userRole" label-width="80px">
+      <el-form-item label="用户名称">
+        <el-input v-model="userRole.username" :disabled="true" />
+      </el-form-item>
+      <el-form-item label="用户昵称">
+        <el-input v-model="userRole.nickname" :disabled="true" />
+      </el-form-item>
+      <el-form-item label="角色">
+        <el-transfer
+          v-model="userRole.roleIds"
+          :titles="['角色列表', '已选择']"
+          :props="{
+            key: 'id',
+            label: 'name'
+          }"
+          :data="roleOptions"
+        />
+      </el-form-item>
+    </el-form>
+    <!-- 操作按钮 -->
+    <template #footer>
+      <el-button type="primary" :loading="loading" @click="submitRole">
+        {{ t('action.save') }}
+      </el-button>
+      <el-button @click="roleDialogVisible = false">{{ t('dialog.close') }}</el-button>
     </template>
   </Dialog>
   <!-- 导入 -->
