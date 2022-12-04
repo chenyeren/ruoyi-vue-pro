@@ -17,6 +17,7 @@ export default {
     cancel: '取消',
     close: '关闭',
     reload: '重新加载',
+    success: '成功',
     closeTab: '关闭标签页',
     closeTheLeftTab: '关闭左侧标签页',
     closeTheRightTab: '关闭右侧标签页',
@@ -91,7 +92,9 @@ export default {
     copyFailed: '拷贝失败',
     footer: '页脚',
     uniqueOpened: '菜单手风琴',
-    tagsViewIcon: '标签页图标'
+    tagsViewIcon: '标签页图标',
+    reExperienced: '请重新退出登录体验',
+    fixedMenu: '固定菜单'
   },
   size: {
     default: '默认',
@@ -127,6 +130,13 @@ export default {
     qrcode: '扫描二维码登录',
     btnRegister: '注册',
     SmsSendMsg: '验证码已发送'
+  },
+  captcha: {
+    verification: '请完成安全验证',
+    slide: '向右滑动完成验证',
+    point: '请依次点击',
+    success: '验证成功',
+    fail: '验证失败'
   },
   router: {
     login: '登录',
@@ -179,7 +189,6 @@ export default {
     access: '项目访问',
     toDo: '待办',
     introduction: '一个正经的简介',
-    more: '更多',
     shortcutOperation: '快捷入口',
     operation: '操作',
     index: '指数',
@@ -191,7 +200,6 @@ export default {
     yield: '产量',
     dynamic: '动态',
     push: '推送',
-    pushCode: '推送 代码到 Github',
     follow: '关注'
   },
   form: {
@@ -275,6 +283,7 @@ export default {
     edit: '编辑',
     update: '编辑',
     preview: '预览',
+    more: '更多',
     sync: '同步',
     save: '保存',
     detail: '详情',

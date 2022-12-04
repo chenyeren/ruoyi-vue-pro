@@ -1,18 +1,19 @@
 <script setup lang="ts">
-import { ElSwitch } from 'element-plus'
-import { useI18n } from '@/hooks/web/useI18n'
-import { useAppStore } from '@/store/modules/app'
 import { computed, ref, watch } from 'vue'
+import { ElSwitch, ElInput } from 'element-plus'
 import { setCssVar } from '@/utils'
+import { useI18n } from '@/hooks/web/useI18n'
 import { useDesign } from '@/hooks/web/useDesign'
-
-const { getPrefixCls } = useDesign()
-
-const prefixCls = getPrefixCls('interface-display')
-
-const appStore = useAppStore()
+import { useWatermark } from '@/hooks/web/useWatermark'
+import { useAppStore } from '@/store/modules/app'
 
 const { t } = useI18n()
+const { getPrefixCls } = useDesign()
+const { setWatermark } = useWatermark()
+const prefixCls = getPrefixCls('interface-display')
+const appStore = useAppStore()
+
+const water = ref()
 
 // 面包屑
 const breadcrumb = ref(appStore.getBreadcrumb)
@@ -107,6 +108,18 @@ const greyModeChange = (show: boolean) => {
   appStore.setGreyMode(show)
 }
 
+// 固定菜单
+const fixedMenu = ref(appStore.getFixedMenu)
+
+const fixedMenuChange = (show: boolean) => {
+  appStore.setFixedMenu(show)
+}
+
+// 设置水印
+const setWater = () => {
+  setWatermark(water.value)
+}
+
 const layout = computed(() => appStore.getLayout)
 
 watch(
@@ -184,6 +197,16 @@ watch(
     <div class="flex justify-between items-center">
       <span class="text-14px">{{ t('setting.greyMode') }}</span>
       <ElSwitch v-model="greyMode" @change="greyModeChange" />
+    </div>
+
+    <div class="flex justify-between items-center">
+      <span class="text-14px">{{ t('setting.fixedMenu') }}</span>
+      <ElSwitch v-model="fixedMenu" @change="fixedMenuChange" />
+    </div>
+
+    <div class="flex justify-between items-center">
+      <span class="text-14px">{{ t('watermark.watermark') }}</span>
+      <ElInput v-model="water" class="w-20 right-1" @change="setWater()" />
     </div>
   </div>
 </template>

@@ -1,43 +1,44 @@
 import { defineStore } from 'pinia'
 import { store } from '../index'
 import { DictDataVO } from '@/api/system/dict/types'
+import { useCache } from '@/hooks/web/useCache'
+const { wsCache } = useCache('sessionStorage')
 
 export interface DictValueType {
-  value: string
+  value: any
   label: string
-  clorType: string
-  cssClass: string
+  clorType?: string
+  cssClass?: string
 }
 export interface DictTypeType {
   dictType: string
   dictValue: DictValueType[]
 }
 export interface DictState {
-  isSetDict: boolean
-  dictMap: Recordable
+  dictMap: Map<string, any>
 }
 
-export const useDictStore = defineStore({
-  id: 'dict',
+export const useDictStore = defineStore('dict', {
   state: (): DictState => ({
-    isSetDict: false,
-    dictMap: {}
+    dictMap: new Map<string, any>()
   }),
-  persist: {
-    enabled: true
-  },
   getters: {
     getDictMap(): Recordable {
-      return this.dictMap
+      const dictMap = wsCache.get('dictCache')
+      return dictMap ? dictMap : this.dictMap
     },
-    getIsSetDict(): boolean {
-      return this.isSetDict
+    getHasDictData(): boolean {
+      if (this.dictMap.size > 0) {
+        return true
+      } else {
+        return false
+      }
     }
   },
   actions: {
     setDictMap(dictMap: Recordable) {
       // 设置数据
-      const dictDataMap = {}
+      const dictDataMap = new Map<string, any>()
       dictMap.forEach((dictData: DictDataVO) => {
         // 获得 dictType 层级
         const enumValueObj = dictDataMap[dictData.dictType]
@@ -52,10 +53,8 @@ export const useDictStore = defineStore({
           cssClass: dictData.cssClass
         })
       })
-      this.dictMap = dictMap
-    },
-    setIsSetDict(isSetDict: boolean) {
-      this.isSetDict = isSetDict
+      this.dictMap = dictDataMap
+      wsCache.set('dictCache', dictDataMap, { exp: 60 }) // 60 秒 过期
     }
   }
 })

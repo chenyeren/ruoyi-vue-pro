@@ -17,6 +17,7 @@ export default {
     cancel: 'Cancel',
     close: 'Close',
     reload: 'Reload current',
+    success: 'Success',
     closeTab: 'Close current',
     closeTheLeftTab: 'Close left',
     closeTheRightTab: 'Close right',
@@ -91,7 +92,9 @@ export default {
     copyFailed: 'Copy failed',
     footer: 'Footer',
     uniqueOpened: 'Unique opened',
-    tagsViewIcon: 'Tags view icon'
+    tagsViewIcon: 'Tags view icon',
+    reExperienced: 'Please exit the login experience again',
+    fixedMenu: 'Fixed menu'
   },
   size: {
     default: 'Default',
@@ -127,6 +130,13 @@ export default {
     qrcode: 'Scan the QR code to log in',
     btnRegister: 'Sign up',
     SmsSendMsg: 'code has been sent'
+  },
+  captcha: {
+    verification: 'Please complete security verification',
+    slide: 'Swipe right to complete verification',
+    point: 'Please click',
+    success: 'Verification succeeded',
+    fail: 'verification failed'
   },
   router: {
     login: 'Login',
@@ -179,7 +189,6 @@ export default {
     access: 'Project access',
     toDo: 'To do',
     introduction: 'A serious introduction',
-    more: 'More',
     shortcutOperation: 'Quick entry',
     operation: 'Operation',
     index: 'Index',
@@ -191,7 +200,6 @@ export default {
     yield: 'Yield',
     dynamic: 'Dynamic',
     push: 'push',
-    pushCode: 'push code to Github',
     follow: 'Follow'
   },
   form: {
@@ -275,6 +283,7 @@ export default {
     edit: 'Edit',
     update: 'Update',
     preview: 'Preview',
+    more: 'More',
     sync: 'Sync',
     save: 'Save',
     detail: 'Detail',
