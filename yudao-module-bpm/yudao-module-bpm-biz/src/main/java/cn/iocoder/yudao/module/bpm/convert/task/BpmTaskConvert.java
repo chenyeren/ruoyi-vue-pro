@@ -48,7 +48,7 @@ public interface BpmTaskConvert {
             return null;
         }
         try {
-            T newInstance = target.newInstance();
+            T newInstance = target.getDeclaredConstructor().newInstance();
             BeanUtils.copyProperties(source, newInstance);
             return newInstance;
         } catch (Exception e) {
@@ -135,6 +135,8 @@ public interface BpmTaskConvert {
     }
 
     @Mapping(source = "taskDefinitionKey", target = "definitionKey")
+    @Mapping(target = "createTime", expression = "java(bean.getCreateTime() == null ? null : LocalDateTime.ofInstant(bean.getCreateTime().toInstant(), ZoneId.systemDefault()))")
+    @Mapping(target = "endTime", expression = "java(bean.getEndTime() == null ? null : LocalDateTime.ofInstant(bean.getEndTime().toInstant(), ZoneId.systemDefault()))")
     BpmTaskRespVO convert3(HistoricTaskInstance bean);
 
     BpmTaskRespVO.User convert3(AdminUserRespDTO bean);

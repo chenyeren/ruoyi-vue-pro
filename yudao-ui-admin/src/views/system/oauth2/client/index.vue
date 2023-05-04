@@ -1,5 +1,6 @@
 <template>
   <div class="app-container">
+    <doc-alert title="OAuth 2.0（SSO 单点登录)" url="https://doc.iocoder.cn/oauth2/" />
 
     <!-- 搜索工作栏 -->
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
@@ -154,7 +155,7 @@ import {CommonStatusEnum} from "@/utils/constants";
 import FileUpload from "@/components/FileUpload";
 
 export default {
-  name: "OAuth2Client",
+  name: "SystemOAuth2Client",
   components: {
     FileUpload,
     ImageUpload,

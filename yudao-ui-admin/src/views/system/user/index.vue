@@ -248,7 +248,7 @@ import {listSimpleRoles} from "@/api/system/role";
 import {getBaseHeader} from "@/utils/request";
 
 export default {
-  name: "User",
+  name: "SystemUser",
   components: { Treeselect },
   data() {
     return {
@@ -364,9 +364,9 @@ export default {
   created() {
     this.getList();
     this.getTreeselect();
-    this.getConfigKey("sys.user.init-password").then(response => {
-      this.initPassword = response.msg;
-    });
+    // this.getConfigKey("sys.user.init-password").then(response => {
+    //   this.initPassword = response.msg;
+    // });
   },
   methods: {
     // 更多操作

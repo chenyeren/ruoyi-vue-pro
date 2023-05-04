@@ -3,6 +3,37 @@
  *
  * 枚举类
  */
+import {beginOfDay, endOfDay} from "@/utils/dateUtils";
+
+export const datePickerOptions = {
+  shortcuts: [{
+    text: '最近一周',
+    onClick(picker) {
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+      const end = new Date();
+      picker.$emit('pick', [beginOfDay(start), endOfDay(end)]);
+    }
+  }, {
+    text: '最近一个月',
+    onClick(picker) {
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+      const end = new Date();
+      picker.$emit('pick', [beginOfDay(start), endOfDay(end)]);
+    }
+  }, {
+    text: '最近三个月',
+    onClick(picker) {
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+      const end = new Date();
+      picker.$emit('pick', [beginOfDay(start), endOfDay(end)]);
+    }
+  }]
+}
+
+// ========== 静态变量 ==========
 
 /**
  * 全局通用状态枚举
@@ -117,6 +148,28 @@ export const PayChannelEnum = {
     "code": "alipay_qr",
     "name": "支付宝扫码支付"
   },
+  ALIPAY_BAR: {
+    "code": "alipay_bar",
+    "name": "支付宝条码支付"
+  },
+}
+
+/**
+ * 支付的展示模式每局
+ */
+export const PayDisplayModeEnum = {
+  URL: {
+    "mode": "url",
+  },
+  IFRAME: {
+    "mode": "iframe",
+  },
+  FORM: {
+    "mode": "form"
+  },
+  QR_CODE: {
+    "mode": "qr_code"
+  }
 }
 
 /**
@@ -141,7 +194,7 @@ export const PayOrderStatusEnum = {
   },
   CLOSED: {
     status: 20,
-    name: '未支付'
+    name: '支付关闭'
   }
 }
 

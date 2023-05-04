@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.pay.service.refund;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.pay.config.PayProperties;
 import cn.iocoder.yudao.framework.pay.core.client.PayClientFactory;
 import cn.iocoder.yudao.framework.pay.core.enums.PayChannelEnum;
 import cn.iocoder.yudao.framework.test.core.ut.BaseDbUnitTest;
@@ -39,6 +40,8 @@ public class PayRefundServiceTest extends BaseDbUnitTest {
     private PayRefundMapper refundMapper;
 
     @MockBean
+    private PayProperties payProperties;
+    @MockBean
     private PayClientFactory payClientFactory;
     @MockBean
     private PayOrderService orderService;
@@ -67,8 +70,8 @@ public class PayRefundServiceTest extends BaseDbUnitTest {
             o.setNotifyStatus(PayOrderNotifyStatusEnum.SUCCESS.getStatus());
             o.setStatus(PayRefundStatusEnum.SUCCESS.getStatus());
             o.setType(PayRefundTypeEnum.SOME.getStatus());
-            o.setPayAmount(100L);
-            o.setRefundAmount(500L);
+            o.setPayAmount(100);
+            o.setRefundAmount(500);
             o.setReason("就是想退款了，你有意见吗");
             o.setUserIp("127.0.0.1");
             o.setChannelOrderNo("CH0000001");
@@ -136,8 +139,8 @@ public class PayRefundServiceTest extends BaseDbUnitTest {
             o.setNotifyStatus(PayOrderNotifyStatusEnum.SUCCESS.getStatus());
             o.setStatus(PayRefundStatusEnum.SUCCESS.getStatus());
             o.setType(PayRefundTypeEnum.SOME.getStatus());
-            o.setPayAmount(100L);
-            o.setRefundAmount(500L);
+            o.setPayAmount(100);
+            o.setRefundAmount(500);
             o.setReason("就是想退款了，你有意见吗");
             o.setUserIp("127.0.0.1");
             o.setChannelOrderNo("CH0000001");

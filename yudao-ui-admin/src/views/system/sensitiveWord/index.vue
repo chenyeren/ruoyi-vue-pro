@@ -1,5 +1,6 @@
 <template>
   <div class="app-container">
+    <doc-alert title="敏感词" url="https://doc.iocoder.cn/sensitive-word" />
     <!-- 搜索工作栏 -->
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="敏感词" prop="name">
@@ -132,7 +133,7 @@ import { createSensitiveWord, updateSensitiveWord, deleteSensitiveWord, getSensi
 import {CommonStatusEnum} from "@/utils/constants";
 
 export default {
-  name: "SensitiveWord",
+  name: "SystemSensitiveWord",
   data() {
     return {
       // 遮罩层
